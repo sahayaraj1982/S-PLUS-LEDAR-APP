@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Leader Portal</title><style>
+:root{--gold:#ffd700}*{box-sizing:border-box}body{margin:0;background:#111;color:#fff;font-family:Arial,sans-serif}.portal{max-width:560px;margin:auto;padding:14px}.card{background:#1c1c1c;border:1px solid #444;border-radius:14px;padding:14px;margin-bottom:10px}.login{margin-top:18vh}.muted{color:#aaa;font-size:12px}input{width:100%;padding:12px;margin:8px 0;border:1px solid #555;border-radius:9px;background:#222;color:#fff;font-size:16px}button{border:0;border-radius:9px;padding:11px 14px;font-weight:800;cursor:pointer}.gold{background:var(--gold);color:#111}.wa{background:#25D366;color:#fff}.toolbar{display:flex;gap:8px;margin:10px 0}.toolbar button{flex:1}.user-card{display:flex;justify-content:space-between;gap:10px;align-items:center}.balance{font-weight:900}.tx{border-top:1px solid #333;padding:9px 0;font-size:13px}.green{color:#54d17a}.red{color:#ff6b6b}.hidden{display:none!important}.user-card.redbg{background:linear-gradient(145deg,#8b0000,#5a0000)!important;border-color:#ff4444!important}.profile-red{border:2px solid #ff4444!important;background:linear-gradient(145deg,#8b0000,#5a0000)!important}.tx-table{width:100%;border-collapse:collapse;background:#1a1a1a;margin-top:10px}.tx-table th,.tx-table td{padding:10px 5px;text-align:center;border-bottom:1px solid #444;font-size:13px}.tx-table th{background:#333;color:#ffd700;font-weight:bold}.credit-row{background:#1f7a1f!important;color:#fff!important;font-weight:700}.debit-row{background:#b91c1c!important;color:#fff!important;font-weight:700}.pending-row{background:#2c2c2c!important;color:#ffd700!important;font-weight:700}.credit-row td,.debit-row td,.pending-row td{color:inherit!important}.head{text-align:center}.head h2{margin-bottom:4px}.back{margin-bottom:10px}
+.dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0}
+.stat-box{background:#222;padding:15px 10px;border-radius:10px;text-align:center;border:1px solid #333}
+.stat-box.red-border{border:2px solid #e53935}
+.stat-box small{color:#aaa;font-size:11px;text-transform:uppercase;font-weight:bold;display:block;margin-bottom:5px}
+.stat-box h2{margin:0;font-size:20px;color:var(--gold);font-weight:900}
+</style>
+<style>
+/* Leader User View: match Admin user-screen outline; Red User is shown
+   through the user card/status, not by making the entire profile screen red. */
+#userScreen .profile-header{
+  background:#222 !important;
+  border:0 !important;
+  border-bottom:2px solid var(--theme-color) !important;
+  outline:none !important;
+  box-shadow:none !important;
+}
+#userScreen{
+  background:inherit !important;
+  border:0 !important;
+  outline:none !important;
+  box-shadow:none !important;
+}
+#userScreen .table-container{
+  border:0 !important;
+  outline:none !important;
+}
+</style>
+
+<style>
+/* User Screen: Admin-style neutral outline. Red User highlight remains on the user card only. */
+#userScreen,
+#userScreen .profile-header,
+#userScreen .table-container,
+#userScreen .table-container table {
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  border-top-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#userScreen .profile-header {
+  background:#222 !important;
+  border-bottom:2px solid var(--theme-color) !important;
+}
+</style>
+
+</head><body>
+<div id="login" class="portal"><div class="card login"><div class="head"><h2>👑 Leader Portal</h2><div class="muted">Leader Password மூலம் Login செய்யவும்</div></div><input id="password" type="password" placeholder="Leader Password" autocomplete="off"><button class="gold" style="width:100%" onclick="login()">🔐 Login</button><div id="msg" class="muted" style="margin-top:10px"></div></div></div>
+<div id="home" class="portal hidden"><div class="head"><h2 id="leaderName">👑 Leader</h2><div class="dashboard">
+<div class="stat-box"><small>TOTAL USERS</small><h2 id="totalUsers">0</h2></div>
+<div class="stat-box"><small>TOTAL BALANCE</small><h2 id="totalBalance">₹ 0</h2></div>
+<div class="stat-box red-border"><small>RED USERS</small><h2 id="redUsersCount">0</h2></div>
+<div class="stat-box red-border"><small>RED USERS 10% TOTAL BALANCE</small><h2 id="tenPercentTotal">₹ 0</h2></div>
+</div></div><div class="toolbar"><button class="gold" onclick="makePDF()">📄 Transaction PDF</button><button class="wa" onclick="shareWhatsApp()">📱 WhatsApp</button></div><input id="search" placeholder="🔍 Search User" oninput="renderUsers()"><div id="usersList"></div></div>
+<div id="profile" class="portal hidden"><button class="gold back" onclick="backHome()">← Back</button><div id="profileBody"></div></div>
+<script>
+const CLOUD_URL="https://script.google.com/macros/s/AKfycbyhndz0IkFxfket9b_MXbwPoxhXe6i7-jV2hzoomk14zbFJxY7go298EIe0hmRf84OV/exec";
+let users=[],leaders=[],leader=null,leaderUsers=[];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=d=>{if(!d)return'';let x=new Date(d);return isNaN(x)?String(d):`${x.getDate()}-${x.getMonth()+1}-${String(x.getFullYear()).slice(2)}`};
+const balance=u=>(u.transactions||[]).reduce((s,t)=>s+Number(t.credit||0)-Number(t.debit||0),0);
+async function cloud(){let r=await fetch(CLOUD_URL,{cache:'no-store'});if(!r.ok)throw Error();let d=await r.json();if(Array.isArray(d)){users=d;leaders=[]}else{users=Array.isArray(d.users)?d.users:[];leaders=Array.isArray(d.leaders)?d.leaders:[]}users.forEach((u,i)=>{if(!Array.isArray(u.transactions))u.transactions=[]});}
+async function login(){let p=document.getElementById('password').value.trim();if(!p)return;document.getElementById('msg').textContent='Checking...';try{await cloud();let found=leaders.filter(x=>String(x.password||'')===p);if(found.length!==1){document.getElementById('msg').textContent=found.length?'இந்த password ஒன்றுக்கு மேற்பட்ட Leader-களிடம் உள்ளது.':'Password தவறாக உள்ளது.';return}leader=found[0];leaderUsers=users.filter(u=>String(u.leaderId||'')===String(leader.id||''));document.getElementById('login').classList.add('hidden');document.getElementById('home').classList.remove('hidden');document.getElementById('leaderName').textContent='👑 '+leader.name;renderUsers()}catch(e){document.getElementById('msg').textContent='Cloud data load ஆகவில்லை. மீண்டும் முயற்சிக்கவும்.'}}
+function localDate(){let d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().split('T')[0]}
+function isRed(u){if(!u.transactions?.length)return false;let td=localDate();return u.transactions.some(t=>{let d=String(t.date||'').split('T')[0],c=String(t.credit??'').trim(),db=String(t.debit??'').trim();return d&&d<=td&&!c&&!db})}
+function getRedTenPercentTotal(list){return list.filter(isRed).reduce((sum,u)=>(sum+(u.transactions||[]).reduce((a,t)=>a+Math.max(0,Number(t.debit||0))*0.10,0)),0)}
+function updateLeaderDashboard(){
+  const list=leaderUsers||[];
+  const total=list.reduce((s,u)=>s+balance(u),0);
+  const red=list.filter(isRed);
+  const ten=getRedTenPercentTotal(list);
+  const a=document.getElementById('totalUsers'); if(a)a.innerText=list.length;
+  const b=document.getElementById('totalBalance'); if(b)b.innerText='₹ '+total.toLocaleString();
+  const c=document.getElementById('redUsersCount'); if(c)c.innerText=red.length;
+  const d=document.getElementById('tenPercentTotal'); if(d)d.innerText='₹ '+ten.toLocaleString();
+}
+function renderUsers(){
+  updateLeaderDashboard();let q=(document.getElementById('search').value||'').toLowerCase().trim(),arr=leaderUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.mobile||'').toLowerCase().includes(q));arr.sort((a,b)=>{let x=isRed(a),y=isRed(b);if(x!==y)return y-x;return Math.abs(balance(a))-Math.abs(balance(b))});let cr=arr.reduce((s,u)=>s+(u.transactions||[]).reduce((a,t)=>a+Math.max(0,Number(t.credit||0)),0),0),db=arr.reduce((s,u)=>s+(u.transactions||[]).reduce((a,t)=>a+Math.max(0,Number(t.debit||0)),0),0),bal=arr.reduce((s,u)=>s+balance(u),0);let box=document.getElementById('usersList');box.innerHTML='';if(!arr.length){box.innerHTML='<div class="card muted">User கிடைக்கவில்லை.</div>';return}arr.forEach(u=>{let d=document.createElement('div');d.className='card user-card'+(isRed(u)?' redbg':'');d.innerHTML=`<div><b>${esc(u.name)}</b><div class="muted">${esc(u.mobile||'')}</div></div><div style="text-align:right"><div class="balance">₹ ${balance(u).toLocaleString()}</div><button class="gold" style="margin-top:6px;padding:7px 10px" onclick="viewUser('${esc(u.id)}')">View</button></div>`;box.appendChild(d)})}
+function viewUser(id){let u=leaderUsers.find(x=>x.id===id);if(!u)return;document.getElementById('home').classList.add('hidden');document.getElementById('profile').classList.remove('hidden');let red=isRed(u);let tx=(u.transactions||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));let bal=0,rows=[];tx.forEach(t=>{let note=!String(t.credit??'').trim()&&!String(t.debit??'').trim();if(!note)bal+=Number(t.credit||0)-Number(t.debit||0);rows.push({...t,cumulative:note?'':bal})});rows.reverse();let table=rows.map(t=>{let cls=Number(t.credit||0)>0?'credit-row':Number(t.debit||0)>0?'debit-row':'pending-row';return `<tr class="${cls}"><td>${esc(fmtDate(t.date))}</td><td>${esc(t.desc||'')}</td><td>${t.credit||''}</td><td>${t.debit||''}</td><td><b>${t.cumulative!==''?'₹ '+Number(t.cumulative).toLocaleString():''}</b></td></tr>`}).join('');document.getElementById('profileBody').innerHTML=`<div class="card"><h2>👤 ${esc(u.name)}</h2><div class="muted">${esc(u.mobile||'No Mobile')}</div><div class="muted">👑 ${esc(leader.name)}</div><h3>Bal: ₹ ${balance(u).toLocaleString()}</h3><div style="overflow-x:auto"><table class="tx-table"><thead><tr><th>Date</th><th>Desc</th><th>Cr</th><th>Db</th><th>Bal</th></tr></thead><tbody>${table||'<tr><td colspan="5" class="muted">Transactions இல்லை.</td></tr>'}</tbody></table></div></div>`}
+function backHome(){document.getElementById('profile').classList.add('hidden');document.getElementById('home').classList.remove('hidden')}
+function shareWhatsApp(){if(!leader)return;let msg=`Leader: ${leader.name}\nUsers: ${leaderUsers.length}\n\n`+leaderUsers.map((u,i)=>`${i+1}. ${u.name} — Balance ₹ ${balance(u).toLocaleString()}\n`+(u.transactions||[]).map(t=>`${fmtDate(t.date)} | ${t.desc||''} | Cr ₹${Number(t.credit||0).toLocaleString()} | Db ₹${Number(t.debit||0).toLocaleString()}`).join('\n')).join('\n\n');if(navigator.share)navigator.share({title:leader.name+' Transactions',text:msg}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')}
+function makePDF(){
+  if(!window.jspdf)return alert('PDF library load ஆகவில்லை.');
+  if(!leader || !leaderUsers.length)return alert('Users இல்லை.');
+
+  const old=document.getElementById('pdfUserModal');
+  if(old)old.remove();
+
+  const modal=document.createElement('div');
+  modal.id='pdfUserModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML=`<div style="background:#1c1c1c;border:1px solid #555;border-radius:14px;width:min(500px,100%);max-height:90vh;overflow:auto;padding:16px;color:#fff">
+    <h3 style="margin:0 0 8px">📄 Select Users for PDF</h3>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button id="pdfSelectAll" class="gold" style="flex:1">Select All</button>
+      <button id="pdfClearAll" style="flex:1;background:#444;color:#fff">Clear All</button>
+    </div>
+    <div id="pdfUserChecks"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="pdfCancel" style="flex:1;background:#444;color:#fff">Cancel</button>
+      <button id="pdfGenerate" class="gold" style="flex:1">Generate PDF</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+
+  const box=modal.querySelector('#pdfUserChecks');
+  leaderUsers.forEach(u=>{
+    const row=document.createElement('label');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #333;cursor:pointer';
+    row.innerHTML=`<input type="checkbox" class="pdf-user-check" value="${esc(u.id)}" checked style="width:20px;height:20px;margin:0"><span style="flex:1"><b>${esc(u.name)}</b><small style="display:block;color:#aaa">${esc(u.mobile||'')} — Balance ₹ ${balance(u).toLocaleString()}</small></span>`;
+    box.appendChild(row);
+  });
+
+  modal.querySelector('#pdfSelectAll').onclick=()=>modal.querySelectorAll('.pdf-user-check').forEach(x=>x.checked=true);
+  modal.querySelector('#pdfClearAll').onclick=()=>modal.querySelectorAll('.pdf-user-check').forEach(x=>x.checked=false);
+  modal.querySelector('#pdfCancel').onclick=()=>modal.remove();
+
+  modal.querySelector('#pdfGenerate').onclick=()=>{
+    const ids=[...modal.querySelectorAll('.pdf-user-check:checked')].map(x=>String(x.value));
+    const selected=leaderUsers.filter(u=>ids.includes(String(u.id)));
+    if(!selected.length)return alert('குறைந்தது ஒரு User-ஐ select செய்யவும்.');
+    modal.remove();
+    generateSelectedPDF(selected);
+  };
+}
+
+function generateSelectedPDF(selected){
+  let {jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),w=doc.internal.pageSize.getWidth();
+  let total=selected.reduce((s,u)=>s+balance(u),0);
+
+  // PDF header: keep all summary information at the top, matching the supplied model.
+  // Strong, readable PDF header — summary on the left, date/time clearly visible at the top.
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(18);
+  doc.text('TRANSACTION',w/2,14,{align:'center'});
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.text('DATE & TIME: '+new Date().toLocaleString(),w-10,23,{align:'right'});
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('LEADER: '+String(leader.name||''),10,34);
+  doc.setFontSize(13);
+  doc.text('TOTAL USERS: '+selected.length,10,43);
+  const totalTenPercent=selected.reduce((sum,u)=>(sum+(u.transactions||[]).reduce((a,t)=>a+Math.max(0,Number(t.debit||0))*0.10,0)),0);
+  doc.text('10% TOTAL: Rs. '+totalTenPercent.toLocaleString(),10,52);
+
+  // One row per selected user only. No individual transaction entries are printed.
+  const rows=selected.map(u=>{
+    const tx=u.transactions||[];
+    const loan=tx.reduce((sum,t)=>sum+Math.max(0,Number(t.debit||0)),0);
+    const credit=tx.reduce((sum,t)=>sum+Math.max(0,Number(t.credit||0)),0);
+    const crCount=tx.filter(t=>Number(t.credit||0)>0).length;
+    const bal=balance(u);
+    const tenPercent=loan*0.10;
+    return [
+      u.name||'',
+      loan.toLocaleString(),
+      String(crCount),
+      credit.toLocaleString(),
+      bal.toLocaleString(),
+      tenPercent.toLocaleString()
+    ];
+  });
+
+  if(doc.autoTable){
+    doc.autoTable({
+      startY:60,
+      head:[['USER','LOAN','CR','CREDIT','BALANCE','10%']],
+      body:rows,
+      margin:{left:10,right:10},
+      styles:{fontSize:12,cellPadding:3.5,halign:'center',valign:'middle',fontStyle:'bold'},
+      headStyles:{fontSize:11,fontStyle:'bold',halign:'center'},
+      columnStyles:{0:{halign:'left',fontStyle:'bold',fontSize:12}}
+    });
+  }
+  doc.save('Leader_'+String(leader.name).replace(/[^a-z0-9_-]/gi,'_')+'_Transaction.pdf');
+}document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+</script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script></body></html>
