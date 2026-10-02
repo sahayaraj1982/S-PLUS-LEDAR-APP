@@ -359,6 +359,35 @@ html, body {
 }
 </style>
 
+<style id="small-name-back-fix">
+.name-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0 20px}.name-row .name{margin:0!important}.small-back{flex:0 0 auto;border-radius:6px!important;font-size:14px!important;padding:7px 11px!important;font-weight:800}@media(max-width:600px){.name-row{gap:8px;flex-wrap:nowrap}.small-back{font-size:12px!important;padding:6px 9px!important}}
+</style>
+
+<style id="small-name-back-fix">
+.name-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 20px;}
+.name-row .name{margin:0 !important;}
+.small-back{flex:0 0 auto;border-radius:6px !important;font-size:13px !important;padding:6px 10px !important;font-weight:800;}
+@media (max-width:600px){.name-row{gap:7px;}.small-back{font-size:11px !important;padding:5px 8px !important;}}
+</style>
+
+
+
+\n<style id="user-screen-no-edit-download">\n#profile .user-actions,\n#profile button[data-action="edit"],\n#profile button[data-action="download"],\n#profile .edit,\n#profile .download,\n#profile .entry { display:none !important; }\n#profile .user-screen button:not(.small-back) { }\n</style>\n<script>\nfunction lockUserScreenControls(){\n  const root=document.getElementById('profile');\n  if(!root) return;\n  root.querySelectorAll('button,a,[role="button"]').forEach(el=>{\n    const t=(el.textContent||'').trim().toLowerCase();\n    if(t.includes('edit') || t.includes('download') || t.includes('+ entry') || t==='entry') {\n      el.style.display='none';\n      el.onclick=null;\n      el.removeAttribute('href');\n      el.setAttribute('aria-disabled','true');\n      el.style.pointerEvents='none';\n    }\n  });\n}\nconst _oldViewUser=window.viewUser;\nif(typeof _oldViewUser==='function'){\n  window.viewUser=function(){ const r=_oldViewUser.apply(this,arguments); setTimeout(lockUserScreenControls,0); return r; };\n}\n</script>\n
+<style id="final-user-back">
+#profile .name-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 20px;}
+#profile .name-row .name{margin:0!important;}
+#profile .small-back{display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto;border-radius:6px!important;font-size:13px!important;padding:6px 9px!important;font-weight:800;}
+@media(max-width:600px){#profile .small-back{font-size:11px!important;padding:5px 8px!important;}}
+</style>
+
+<style id="final-user-controls-v2">
+#profile > .back{display:none !important;}
+#profile .user-actions{display:none !important;}
+#profile .edit,#profile .download,#profile .entry,[data-action="edit"],[data-action="download"],[data-action="entry"]{display:none !important;pointer-events:none !important;}
+.name-row{justify-content:flex-start !important;align-items:center !important;gap:10px !important;}
+.small-back{width:42px !important;height:34px !important;padding:0 !important;font-size:20px !important;line-height:34px !important;border-radius:6px !important;flex:0 0 42px !important;}
+.name-row .name{text-align:left !important;flex:1 !important;}
+</style>
 </head><body>
 <div id="login" class="portal"><div class="card login"><div class="head"><h2>👑 Leader Portal</h2><div class="muted">Leader Password மூலம் Login செய்யவும்</div></div><input id="password" type="password" placeholder="Leader Password" autocomplete="off"><button class="gold" style="width:100%" onclick="login()">🔐 Login</button><div id="msg" class="muted" style="margin-top:10px"></div></div></div>
 <div id="home" class="portal hidden"><div class="head"><h2 id="leaderName">👑 Leader</h2><div class="dashboard">
@@ -367,7 +396,7 @@ html, body {
 <div class="stat-box red-border"><small>RED USERS</small><h2 id="redUsersCount">0</h2></div>
 <div class="stat-box red-border"><small>RED USERS 10% TOTAL BALANCE</small><h2 id="tenPercentTotal">₹ 0</h2></div>
 </div></div><div class="toolbar"><button class="gold" onclick="makePDF()">📄 Transaction PDF</button><button class="wa" onclick="shareWhatsApp()">📱 WhatsApp</button></div><input id="search" placeholder="🔍 Search User" oninput="renderUsers()"><div id="usersList"></div></div>
-<div id="profile" class="portal hidden"><button class="gold back" onclick="backHome()">← Back</button><div id="profileBody"></div></div>
+<div id="profile" class="portal hidden"><div id="profileBody"></div></div>
 <script>
 const CLOUD_URL="https://script.google.com/macros/s/AKfycbyhndz0IkFxfket9b_MXbwPoxhXe6i7-jV2hzoomk14zbFJxY7go298EIe0hmRf84OV/exec";
 let users=[],leaders=[],leader=null,leaderUsers=[];
@@ -423,12 +452,11 @@ function viewUser(id){
         <h1 class="splus-brand"><span class="s-logo">S</span> PLUS LOAN APP</h1>
         <div class="logo">G</div>
       </div>
-      <div class="user-actions">
-        <button class="gold" onclick="backHome()">← Back</button>
-        <button class="gold">+ Entry</button>
-      </div>
       <div class="user-info">
-        <div class="name">${esc(u.name)}</div>
+        <div class="name-row">
+          <button class="small-back gold" onclick="backHome()" aria-label="Back">←</button>
+          <div class="name">${esc(u.name)}</div>
+        </div>
         <div class="details">
           <div>
             <div class="mobile">${esc(u.mobile||'')}</div>
