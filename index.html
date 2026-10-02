@@ -194,6 +194,171 @@
   -webkit-text-stroke:1.5px currentColor;
 }
 </style>
+
+<style id="full-screen-fix">
+html, body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  background: #111;
+}
+
+#profile {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#profileBody {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+}
+
+.user-screen {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.user-titlebar {
+  width: 100%;
+  min-height: 92px;
+  padding: 10px 72px 10px 16px;
+}
+
+.user-titlebar h1 {
+  font-size: clamp(22px, 6vw, 42px);
+  line-height: 1.05;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.user-titlebar .logo {
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  font-size: 24px;
+}
+
+.user-actions {
+  width: 100%;
+  padding: 18px 20px 8px;
+}
+
+.user-info {
+  width: 100%;
+  padding: 4px 20px 22px;
+}
+
+.user-info .name {
+  font-size: clamp(25px, 7vw, 38px);
+  margin-bottom: 20px;
+}
+
+.user-info .mobile {
+  font-size: clamp(20px, 5.5vw, 28px);
+}
+
+.user-info .leader {
+  font-size: clamp(19px, 5vw, 27px);
+}
+
+.user-info .balance {
+  font-size: clamp(21px, 5.5vw, 30px);
+}
+
+.user-table-wrap {
+  width: 100%;
+  padding: 18px 10px 30px;
+}
+
+.user-screen .tx-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.user-screen .tx-table th,
+.user-screen .tx-table td {
+  font-size: clamp(13px, 4vw, 23px);
+  padding: 12px 4px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.user-screen .tx-table th:nth-child(1),
+.user-screen .tx-table td:nth-child(1) { width: 17%; }
+
+.user-screen .tx-table th:nth-child(2),
+.user-screen .tx-table td:nth-child(2) { width: 25%; }
+
+.user-screen .tx-table th:nth-child(3),
+.user-screen .tx-table td:nth-child(3) { width: 13%; }
+
+.user-screen .tx-table th:nth-child(4),
+.user-screen .tx-table td:nth-child(4) { width: 17%; }
+
+.user-screen .tx-table th:nth-child(5),
+.user-screen .tx-table td:nth-child(5) { width: 28%; }
+
+@media (max-width: 480px) {
+  #profile > .back {
+    margin: 10px 16px 6px;
+    font-size: 18px;
+    padding: 10px 18px;
+  }
+
+  .user-titlebar {
+    min-height: 82px;
+    padding-left: 10px;
+    padding-right: 58px;
+  }
+
+  .user-titlebar h1 {
+    font-size: 22px;
+  }
+
+  .user-titlebar .logo {
+    right: 9px;
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+  }
+
+  .user-actions {
+    padding: 16px 14px 6px;
+  }
+
+  .user-actions button {
+    font-size: 17px;
+    padding: 10px 15px;
+  }
+
+  .user-info {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .user-info .details {
+    gap: 6px;
+  }
+
+  .user-table-wrap {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .user-screen .tx-table th,
+  .user-screen .tx-table td {
+    font-size: 13px;
+    padding: 10px 3px;
+  }
+}
+</style>
+
 </head><body>
 <div id="login" class="portal"><div class="card login"><div class="head"><h2>👑 Leader Portal</h2><div class="muted">Leader Password மூலம் Login செய்யவும்</div></div><input id="password" type="password" placeholder="Leader Password" autocomplete="off"><button class="gold" style="width:100%" onclick="login()">🔐 Login</button><div id="msg" class="muted" style="margin-top:10px"></div></div></div>
 <div id="home" class="portal hidden"><div class="head"><h2 id="leaderName">👑 Leader</h2><div class="dashboard">
