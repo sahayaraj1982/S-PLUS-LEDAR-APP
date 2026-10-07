@@ -372,7 +372,36 @@ html, body {
 
 
 
-\n<style id="user-screen-no-edit-download">\n#profile .user-actions,\n#profile button[data-action="edit"],\n#profile button[data-action="download"],\n#profile .edit,\n#profile .download,\n#profile .entry { display:none !important; }\n#profile .user-screen button:not(.small-back) { }\n</style>\n<script>\nfunction lockUserScreenControls(){\n  const root=document.getElementById('profile');\n  if(!root) return;\n  root.querySelectorAll('button,a,[role="button"]').forEach(el=>{\n    const t=(el.textContent||'').trim().toLowerCase();\n    if(t.includes('edit') || t.includes('download') || t.includes('+ entry') || t==='entry') {\n      el.style.display='none';\n      el.onclick=null;\n      el.removeAttribute('href');\n      el.setAttribute('aria-disabled','true');\n      el.style.pointerEvents='none';\n    }\n  });\n}\nconst _oldViewUser=window.viewUser;\nif(typeof _oldViewUser==='function'){\n  window.viewUser=function(){ const r=_oldViewUser.apply(this,arguments); setTimeout(lockUserScreenControls,0); return r; };\n}\n</script>\n
+
+<style id="user-screen-no-edit-download">
+#profile .user-actions,
+#profile button[data-action="edit"],
+#profile button[data-action="download"],
+#profile .edit,
+#profile .download,
+#profile .entry { display:none !important; }
+#profile .user-screen button:not(.small-back) { }
+</style>
+<script>
+function lockUserScreenControls(){
+  const root=document.getElementById('profile');
+  if(!root) return;
+  root.querySelectorAll('button,a,[role="button"]').forEach(el=>{
+    const t=(el.textContent||'').trim().toLowerCase();
+    if(t.includes('edit') || t.includes('download') || t.includes('+ entry') || t==='entry') {
+      el.style.display='none';
+      el.onclick=null;
+      el.removeAttribute('href');
+      el.setAttribute('aria-disabled','true');
+      el.style.pointerEvents='none';
+    }
+  });
+}
+const _oldViewUser=window.viewUser;
+if(typeof _oldViewUser==='function'){
+  window.viewUser=function(){ const r=_oldViewUser.apply(this,arguments); setTimeout(lockUserScreenControls,0); return r; };
+}
+</script>\n
 <style id="final-user-back">
 #profile .name-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 20px;}
 #profile .name-row .name{margin:0!important;}
@@ -388,9 +417,177 @@ html, body {
 .small-back{width:42px !important;height:34px !important;padding:0 !important;font-size:20px !important;line-height:34px !important;border-radius:6px !important;flex:0 0 42px !important;}
 .name-row .name{text-align:left !important;flex:1 !important;}
 </style>
+
+<style id="premium-login-and-user-fixes">
+/* ===== BLUE PREMIUM LEADER LOGIN ===== */
+body{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(0,140,255,.20),transparent 38%),
+    radial-gradient(circle at 15% 80%,rgba(0,80,255,.10),transparent 32%),
+    linear-gradient(180deg,#020711 0%,#07111f 48%,#02060c 100%);
+}
+#login.portal{max-width:720px;min-height:100vh;padding:22px 16px;display:flex;align-items:center;justify-content:center;}
+#login .login{
+  position:relative;width:min(520px,100%);margin:0!important;padding:0!important;
+  overflow:hidden;border:1px solid rgba(35,160,255,.72)!important;border-radius:26px!important;
+  background:linear-gradient(145deg,#111e31,#050a12 72%)!important;
+  box-shadow:0 25px 70px rgba(0,0,0,.78),0 0 45px rgba(0,132,255,.18),inset 0 1px 0 rgba(255,255,255,.10)!important;
+}
+#login .login:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(125deg,rgba(255,255,255,.08),transparent 28%,rgba(0,150,255,.07) 58%,transparent 82%),
+    repeating-linear-gradient(135deg,transparent 0 38px,rgba(30,150,255,.025) 39px 40px);
+}
+#login .login-head{
+  position:relative;text-align:center;padding:34px 24px 24px;
+  background:linear-gradient(180deg,rgba(0,130,255,.17),rgba(0,80,180,.03));
+  border-bottom:1px solid rgba(40,155,255,.22);
+}
+.login-company{
+  margin:0 0 18px;
+  font-family:"Arial Black",Arial,sans-serif;
+  font-size:34px;line-height:1.05;font-weight:1000;letter-spacing:1.4px;
+  color:#f5fbff;
+  text-shadow:0 2px 0 #06111e,0 0 20px rgba(50,170,255,.55);
+}
+/* No S-logo / crown above the company name */
+.login-crown{display:none!important;}
+#login .login-head h2{
+  margin:0;color:#36a9ff;font-family:"Arial Black",Arial,sans-serif;
+  font-size:29px;font-weight:1000;letter-spacing:1px;
+  text-shadow:0 2px 0 #00111f,0 0 14px rgba(30,155,255,.45);
+}
+#login .login-head h2 .leader-symbol{color:#fff;margin-right:8px;filter:drop-shadow(0 2px 4px #007fff);}
+#login .login-head .muted{margin-top:9px;color:#b8d8f4;font-size:13px;letter-spacing:.8px;}
+#login .login-form{position:relative;padding:22px 28px 30px;}
+#login .login-form label{display:block;color:#73c5ff;font-size:12px;font-weight:900;letter-spacing:1.4px;margin:0 0 8px;text-transform:uppercase;}
+#login .login-form input{
+  height:56px;margin:0 0 15px!important;padding:0 17px!important;
+  border:1px solid #267fc1!important;border-radius:14px!important;background:#07111d!important;
+  color:#fff!important;
+  box-shadow:inset 0 3px 12px rgba(0,0,0,.58),0 0 0 1px rgba(0,130,255,.05),0 5px 16px rgba(0,0,0,.28);
+}
+#login .login-form input::placeholder{color:#6e8da8;}
+#login .login-form input:focus{outline:none;border-color:#26a7ff!important;box-shadow:0 0 0 3px rgba(0,150,255,.12),0 0 18px rgba(0,140,255,.20),inset 0 3px 10px rgba(0,0,0,.55);}
+#login .login-btn{
+  width:100%;height:55px!important;border-radius:14px!important;font-size:17px!important;
+  background:linear-gradient(180deg,#42b7ff,#087de0)!important;color:#fff!important;
+  border:1px solid #65c8ff!important;
+  text-shadow:0 1px 2px #00345e;
+  box-shadow:inset 0 2px 1px rgba(255,255,255,.42),0 9px 24px rgba(0,90,190,.35),0 0 18px rgba(0,140,255,.15);
+}
+#login .login-btn:active{transform:translateY(2px);box-shadow:inset 0 2px 5px rgba(0,0,0,.3);}
+#login #msg{text-align:center;min-height:18px;font-weight:700;}
+.login-checking{
+  position:fixed;inset:0;z-index:100000;background:rgba(1,7,15,.88);backdrop-filter:blur(9px);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-checking.hidden{display:none!important;}
+.check-card{
+  width:min(330px,88vw);padding:28px 20px 24px;text-align:center;border-radius:22px;
+  border:1px solid rgba(35,160,255,.65);background:linear-gradient(145deg,#102238,#050b14);
+  box-shadow:0 25px 70px rgba(0,0,0,.82),0 0 35px rgba(0,135,255,.20);
+}
+.check-3d{
+  width:82px;height:82px;margin:0 auto 18px;position:relative;
+  transform-style:preserve-3d;animation:spin3d 2.2s linear infinite;
+}
+.check-3d:before,.check-3d:after{
+  content:"";position:absolute;inset:8px;border:5px solid #1ca3ff;border-radius:18px;
+  box-shadow:0 0 18px #008cff,inset 0 0 14px rgba(0,160,255,.35);
+}
+.check-3d:before{transform:rotateX(60deg) rotateZ(45deg);}
+.check-3d:after{transform:rotateY(60deg) rotateZ(45deg);border-color:#bce7ff;}
+.check-dot{
+  position:absolute;left:31px;top:31px;width:20px;height:20px;border-radius:50%;
+  background:#e8f8ff;box-shadow:0 0 20px #008cff;transform:translateZ(30px);
+}
+@keyframes spin3d{from{transform:rotateX(18deg) rotateY(0deg) rotateZ(0deg)}to{transform:rotateX(18deg) rotateY(360deg) rotateZ(360deg)}}
+.check-title{color:#39adff;font-size:18px;font-weight:1000;letter-spacing:.6px;}
+.check-sub{color:#a9c7df;font-size:12px;margin-top:6px;}
+
+/* ===== USER NAME: NEW PREMIUM BLUE BADGE ===== */
+#profile .small-back{
+  width:50px!important;height:40px!important;flex:0 0 50px!important;
+  padding:0!important;border-radius:10px!important;
+  font-family:"Arial Black",Arial,sans-serif!important;font-size:27px!important;
+  font-weight:1000!important;line-height:40px!important;
+  color:#fff!important;background:linear-gradient(180deg,#3db8ff,#087bdc)!important;
+  border:1px solid #8bd5ff!important;
+  text-shadow:0 1px 2px #00345e;
+  box-shadow:inset 0 2px 1px rgba(255,255,255,.55),0 4px 10px rgba(0,80,160,.45),0 0 10px rgba(0,140,255,.18);
+}
+#profile .name-row{gap:12px!important;align-items:center!important;}
+#profile .name-row .name{
+  color:#ffffff!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  font-family:"Arial Black",Arial,sans-serif!important;font-weight:1000!important;
+  letter-spacing:.8px!important;
+  -webkit-text-stroke:0!important;
+  text-shadow:0 2px 0 #001525,0 0 8px rgba(50,175,255,.72)!important;
+  border:1px solid rgba(95,195,255,.92)!important;
+  border-radius:11px!important;
+  padding:7px 13px!important;
+  background:linear-gradient(180deg,#178fe7,#075eaa)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -5px 12px rgba(0,0,0,.20),0 4px 12px rgba(0,75,145,.40),0 0 12px rgba(0,145,255,.22)!important;
+  min-width:0!important;
+}
+#profile .user-info .details{grid-template-columns:minmax(0,1fr) auto!important;align-items:start!important;}
+#profile .user-info .mobile{white-space:nowrap!important;margin-bottom:5px!important;}
+#profile .user-info .leader{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;line-height:1.05!important;}
+#profile .user-info .balance{white-space:nowrap!important;align-self:start!important;margin-top:0!important;}
+#profile .user-screen .tx-table th:first-child,#profile .user-screen .tx-table td:first-child{white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;}
+#profile .user-screen .tx-table th:nth-child(1),#profile .user-screen .tx-table td:nth-child(1){width:22%!important;}
+#profile .user-screen .tx-table th:nth-child(2),#profile .user-screen .tx-table td:nth-child(2){width:23%!important;}
+#profile .user-screen .tx-table th:nth-child(3),#profile .user-screen .tx-table td:nth-child(3){width:12%!important;}
+#profile .user-screen .tx-table th:nth-child(4),#profile .user-screen .tx-table td:nth-child(4){width:16%!important;}
+#profile .user-screen .tx-table th:nth-child(5),#profile .user-screen .tx-table td:nth-child(5){width:27%!important;}
+@media(max-width:480px){
+  #login .login-company{font-size:25px!important;letter-spacing:.7px!important;}
+  #login .login-head h2{font-size:23px!important;}
+  #profile .name-row{gap:8px!important;}
+  #profile .small-back{width:48px!important;height:38px!important;flex-basis:48px!important;font-size:25px!important;}
+  #profile .user-info .name{font-size:clamp(23px,7vw,30px)!important;}
+  #profile .user-info .mobile{font-size:21px!important;}
+  #profile .user-info .leader{font-size:19px!important;}
+  #profile .user-info .balance{font-size:21px!important;}
+  #profile .user-screen .tx-table th,#profile .user-screen .tx-table td{font-size:13px!important;padding:10px 2px!important;}
+}
+</style>
+
+<style id="leader-signout-style">
+#home .portal-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+#home .portal-topbar .signout-btn{background:linear-gradient(180deg,#39adff,#087bdc);color:#fff;border:1px solid #8bd5ff;border-radius:10px;padding:10px 16px;font-family:Arial Black,Arial,sans-serif;font-weight:900;font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 12px rgba(0,100,200,.35);text-shadow:0 1px 2px #00345e;cursor:pointer;}
+#home .portal-topbar .signout-btn:hover{filter:brightness(1.12);transform:translateY(-1px);}
+#home .portal-topbar .signout-btn:active{transform:translateY(1px);}
+#login .login-head h2{display:flex!important;align-items:center;justify-content:center;gap:8px;}
+#login .leader-crown{font-size:1.05em;line-height:1;filter:drop-shadow(0 0 5px rgba(255,215,0,.65));}
+</style>
 </head><body>
-<div id="login" class="portal"><div class="card login"><div class="head"><h2>👑 Leader Portal</h2><div class="muted">Leader Password மூலம் Login செய்யவும்</div></div><input id="password" type="password" placeholder="Leader Password" autocomplete="off"><button class="gold" style="width:100%" onclick="login()">🔐 Login</button><div id="msg" class="muted" style="margin-top:10px"></div></div></div>
-<div id="home" class="portal hidden"><div class="head"><h2 id="leaderName">👑 Leader</h2><div class="dashboard">
+<div id="login" class="portal">
+  <div class="card login">
+    <div class="login-head">
+      <div class="login-company">S PLUS LOAN APP</div>
+      <h2><span class="leader-crown">👑</span> LEADER PORTAL</h2>
+      <div class="muted">SECURE LEADER LOGIN</div>
+    </div>
+    <div class="login-form">
+      <label>Leader Password</label>
+      <input id="password" type="password" placeholder="Enter your password" autocomplete="off">
+      <button class="gold login-btn" onclick="login()">🔐 &nbsp; SECURE LOGIN</button>
+      <div id="msg" class="muted" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+<div id="loginChecking" class="login-checking hidden">
+  <div class="check-card">
+    <div class="check-3d"><div class="check-dot"></div></div>
+    <div class="check-title">VERIFYING PASSWORD</div>
+    <div class="check-sub">Secure 3D verification in progress...</div>
+  </div>
+</div>
+<div id="home" class="portal hidden"><div class="portal-topbar"><div class="head" style="margin:0;flex:1"><h2 id="leaderName">👑 Leader</h2></div><button class="signout-btn" onclick="signOut()">↪ SIGN OUT</button></div><div class="head"><div class="dashboard">
 <div class="stat-box"><small>TOTAL USERS</small><h2 id="totalUsers">0</h2></div>
 <div class="stat-box"><small>TOTAL BALANCE</small><h2 id="totalBalance">₹ 0</h2></div>
 <div class="stat-box red-border"><small>RED USERS</small><h2 id="redUsersCount">0</h2></div>
@@ -404,7 +601,33 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmtDate=d=>{if(!d)return'';let x=new Date(d);return isNaN(x)?String(d):`${x.getDate()}-${x.getMonth()+1}-${String(x.getFullYear()).slice(2)}`};
 const balance=u=>(u.transactions||[]).reduce((s,t)=>s+Number(t.credit||0)-Number(t.debit||0),0);
 async function cloud(){let r=await fetch(CLOUD_URL,{cache:'no-store'});if(!r.ok)throw Error();let d=await r.json();if(Array.isArray(d)){users=d;leaders=[]}else{users=Array.isArray(d.users)?d.users:[];leaders=Array.isArray(d.leaders)?d.leaders:[]}users.forEach((u,i)=>{if(!Array.isArray(u.transactions))u.transactions=[]});}
-async function login(){let p=document.getElementById('password').value.trim();if(!p)return;document.getElementById('msg').textContent='Checking...';try{await cloud();let found=leaders.filter(x=>String(x.password||'')===p);if(found.length!==1){document.getElementById('msg').textContent=found.length?'இந்த password ஒன்றுக்கு மேற்பட்ட Leader-களிடம் உள்ளது.':'Password தவறாக உள்ளது.';return}leader=found[0];leaderUsers=users.filter(u=>String(u.leaderId||'')===String(leader.id||''));document.getElementById('login').classList.add('hidden');document.getElementById('home').classList.remove('hidden');document.getElementById('leaderName').textContent='👑 '+leader.name;renderUsers()}catch(e){document.getElementById('msg').textContent='Cloud data load ஆகவில்லை. மீண்டும் முயற்சிக்கவும்.'}}
+async function login(){
+  let p=document.getElementById('password').value.trim();
+  if(!p)return;
+  const checking=document.getElementById('loginChecking');
+  const msg=document.getElementById('msg');
+  msg.textContent='';
+  checking.classList.remove('hidden');
+  try{
+    await cloud();
+    await new Promise(r=>setTimeout(r,650));
+    let found=leaders.filter(x=>String(x.password||'')===p);
+    checking.classList.add('hidden');
+    if(found.length!==1){
+      msg.textContent=found.length?'இந்த password ஒன்றுக்கு மேற்பட்ட Leader-களிடம் உள்ளது.':'Password தவறாக உள்ளது.';
+      return;
+    }
+    leader=found[0];
+    leaderUsers=users.filter(u=>String(u.leaderId||'')===String(leader.id||''));
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('home').classList.remove('hidden');
+    document.getElementById('leaderName').textContent='👑 '+leader.name;
+    renderUsers();
+  }catch(e){
+    checking.classList.add('hidden');
+    msg.textContent='Cloud data load ஆகவில்லை. மீண்டும் முயற்சிக்கவும்.';
+  }
+}
 function localDate(){let d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().split('T')[0]}
 function isRed(u){if(!u.transactions?.length)return false;let td=localDate();return u.transactions.some(t=>{let d=String(t.date||'').split('T')[0],c=String(t.credit??'').trim(),db=String(t.debit??'').trim();return d&&d<=td&&!c&&!db})}
 function getRedTenPercentTotal(list){return list.filter(isRed).reduce((sum,u)=>(sum+(u.transactions||[]).reduce((a,t)=>a+Math.max(0,Number(t.debit||0))*0.10,0)),0)}
@@ -476,6 +699,19 @@ function viewUser(id){
     </div>`;
 }
 function backHome(){document.getElementById('profile').classList.add('hidden');document.getElementById('home').classList.remove('hidden')}
+function signOut(){
+  leader=null;
+  leaderUsers=[];
+  users=[];
+  leaders=[];
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('profile').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('password').value='';
+  document.getElementById('msg').textContent='';
+  document.getElementById('search').value='';
+  window.scrollTo(0,0);
+}
 function shareWhatsApp(){if(!leader)return;let msg=`Leader: ${leader.name}\nUsers: ${leaderUsers.length}\n\n`+leaderUsers.map((u,i)=>`${i+1}. ${u.name} — Balance ₹ ${balance(u).toLocaleString()}\n`+(u.transactions||[]).map(t=>`${fmtDate(t.date)} | ${t.desc||''} | Cr ₹${Number(t.credit||0).toLocaleString()} | Db ₹${Number(t.debit||0).toLocaleString()}`).join('\n')).join('\n\n');if(navigator.share)navigator.share({title:leader.name+' Transactions',text:msg}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')}
 function makePDF(){
   if(!window.jspdf)return alert('PDF library load ஆகவில்லை.');
