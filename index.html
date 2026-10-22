@@ -725,7 +725,7 @@ function signOut(){
   document.getElementById('search').value='';
   window.scrollTo(0,0);
 }
-const USER_APP_URL="https://sahayaraj1982.github.io/S-PLUS-USER/";
+const USER_APP_URL="https://drive.google.com/uc?export=download&id=1pytRIhOpNKwnQ6fGNamkcBncduhNpCkg";
 function openUserApp(){
  if(!leader)return;
  const msg=`S Plus Loan User App Download Link:\n${USER_APP_URL}`;
@@ -736,40 +736,41 @@ function openUserApp(){
 function credentialStoreKey(){return 'splus_leader_user_credentials_v1';}
 function readCredentials(){try{return JSON.parse(localStorage.getItem(credentialStoreKey())||'{}')}catch(e){return {}}}
 function saveCredentials(data){localStorage.setItem(credentialStoreKey(),JSON.stringify(data));}
-function getPasswordFromCloudUser(u){
-  if(!u || typeof u!=='object')return '';
-  const keys=['password','userPassword','user_password','loginPassword','login_password','pass','pwd'];
-  for(const k of keys){if(u[k]!==undefined && u[k]!==null && String(u[k]).trim()!=='')return String(u[k]);}
-  return '';
-}
 function openUserPassword(){
  if(!leader)return;
  if(!leaderUsers.length){alert('இந்த Leader-க்கு கீழ் User இல்லை.');return;}
  const store=readCredentials(),lk=String(leader.id||leader.name||'leader'),leaderData=store[lk]||{};
  const modal=document.createElement('div');modal.className='credential-modal';modal.id='userCredentialModal';
  const options=leaderUsers.map(u=>`<option value="${esc(u.id)}">${esc(u.name)} — ${esc(u.mobile||'மொபைல் இல்லை')}</option>`).join('');
- modal.innerHTML=`<div class="credential-panel" role="dialog" aria-modal="true" aria-labelledby="credentialTitle"><h3 id="credentialTitle">🔐 USER ID & PASSWORD</h3><div class="muted">Leader: ${esc(leader.name||'')}</div><label for="credentialUser">இந்த Leader-க்கு கீழுள்ள User</label><select id="credentialUser" style="width:100%;padding:12px;border-radius:9px;background:#222;color:#fff;border:1px solid #666;margin-top:6px">${options}</select><label for="credentialId">User Mobile Number (User ID)</label><input id="credentialId" autocomplete="off" placeholder="User Mobile Number" readonly aria-readonly="true"><label for="credentialPassword">கிடைத்துள்ள User Password</label><input id="credentialPassword" type="text" autocomplete="off" placeholder="இந்த script மூலம் Password கிடைக்கவில்லை" readonly aria-readonly="true"><div class="credential-actions"><button class="gold" id="credentialRefresh">🔄 Check Again</button><button style="background:#555;color:#fff" id="credentialClose">Close</button></div><div class="credential-note" id="credentialNote">Google Script திருப்பி அனுப்பும் தரவிலும் இந்தக் கணினியில் ஏற்கெனவே சேமித்த தகவலிலும் Password இருந்தால் மட்டும் இங்கே காட்டப்படும். புதிய Password சேமித்ததாகக் காட்டாது.</div></div>`;
+ modal.innerHTML=`<div class="credential-panel" role="dialog" aria-modal="true" aria-labelledby="credentialTitle"><h3 id="credentialTitle">🔐 USER ID & PASSWORD</h3><div class="muted">Leader: ${esc(leader.name||'')}</div><label for="credentialUser">இந்த Leader-க்கு கீழுள்ள User</label><select id="credentialUser" style="width:100%;padding:12px;border-radius:9px;background:#222;color:#fff;border:1px solid #666;margin-top:6px">${options}</select><label for="credentialId">User Mobile Number (User ID)</label><input id="credentialId" autocomplete="off" placeholder="User Mobile Number" readonly aria-readonly="true"><label for="credentialPassword">User Password</label><input id="credentialPassword" type="text" autocomplete="off" placeholder="Create password"><div class="credential-actions"><button class="gold" id="credentialSave">💾 Save</button><button style="background:#555;color:#fff" id="credentialClose">Close</button></div><div class="credential-note">User பெயர் மற்றும் மொபைல் எண் இங்கே மாற்ற முடியாது. User ID ஆக மொபைல் எண் மட்டும் பயன்படுத்தப்படும்.</div></div>`;
  document.body.appendChild(modal);
- const userSel=modal.querySelector('#credentialUser'),idInput=modal.querySelector('#credentialId'),pwInput=modal.querySelector('#credentialPassword'),note=modal.querySelector('#credentialNote');
- function loadSelected(){
+ const userSel=modal.querySelector('#credentialUser'),idInput=modal.querySelector('#credentialId'),pwInput=modal.querySelector('#credentialPassword');
+ function loadSelected(){const u=leaderUsers.find(x=>String(x.id)===String(userSel.value));const rec=leaderData[String(userSel.value)]||{};idInput.value=String(u&&u.mobile||'').trim();pwInput.value=rec.password||'';}
+ userSel.addEventListener('change',loadSelected);loadSelected();
+ modal.querySelector('#credentialSave').onclick=async()=>{
+  const btn=modal.querySelector('#credentialSave');
   const u=leaderUsers.find(x=>String(x.id)===String(userSel.value));
-  const rec=leaderData[String(userSel.value)]||{};
-  idInput.value=String(u&&u.mobile||'').trim();
-  const cloudPassword=getPasswordFromCloudUser(u);
-  const localPassword=String(rec.password||'');
-  pwInput.value=cloudPassword||localPassword;
-  if(cloudPassword){note.textContent='✅ Google Script திருப்பி அனுப்பிய User பதிவில் Password கிடைத்தது.';note.style.color='#72ff9b';}
-  else if(localPassword){note.textContent='⚠️ இந்தக் கணினியில் மட்டும் முன்பு சேமித்த Password கிடைத்தது; இது Google Sheet-ல் இருப்பதை உறுதிப்படுத்தாது.';note.style.color='#ffd36b';}
-  else {note.textContent='இந்த User-க்கான Password Google Script தரவிலும் உள்ளூர் சேமிப்பிலும் கிடைக்கவில்லை. தற்போதைய Script Password-ஐ வழங்கவில்லை என்றால் HTML மட்டும் கொண்டு அதை மீட்டெடுக்க முடியாது.';note.style.color='#ff9999';}
- }
- userSel.addEventListener('change',loadSelected);
- modal.querySelector('#credentialRefresh').onclick=async()=>{
-  const btn=modal.querySelector('#credentialRefresh');btn.disabled=true;btn.textContent='⏳ Checking...';
-  try{await cloud();leaderUsers=users.filter(u=>String(u.leaderId||'')===String(leader.id||''));loadSelected();}
-  catch(e){note.textContent='Google Script-ல் இருந்து மீண்டும் பெற முடியவில்லை. ஏற்கெனவே கிடைத்த தகவல் மட்டும் காட்டப்படுகிறது.';note.style.color='#ff9999';}
-  finally{btn.disabled=false;btn.textContent='🔄 Check Again';}
+  const uid=String(u&&u.mobile||'').trim(),pw=pwInput.value.trim();
+  const note=modal.querySelector('.credential-note');
+  if(!uid){alert('இந்த User-க்கு மொபைல் எண் இல்லை. முதலில் அசல் User பதிவில் மொபைல் எண் சேர்க்கவும்.');return;}
+  if(!pw){alert('User Password உள்ளிடவும்.');return;}
+  btn.disabled=true;btn.textContent='⏳ Saving...';
+  note.textContent='Google Sheet-ல் சேமிக்கப்படுகிறது...';note.style.color='#ffd36b';
+  try{
+    // Send credentials to the existing Apps Script endpoint. The server must handle action=saveUserPassword.
+    const payload={action:'saveUserPassword',leaderId:String(leader.id||''),leaderName:String(leader.name||''),userId:String(u.id||''),userName:String(u.name||''),mobile:uid,password:pw,updatedAt:new Date().toISOString()};
+    const response=await fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({payload:JSON.stringify(payload)}).toString(),cache:'no-store'});
+    const raw=await response.text();
+    let result;try{result=JSON.parse(raw)}catch(_){throw new Error('Google Apps Script சரியான JSON பதில் தரவில்லை.');}
+    if(!response.ok || result.success===false || result.ok===false || result.error)throw new Error(result.message||result.error||'Google Sheet சேமிப்பு தோல்வியடைந்தது.');
+    if(result.success!==true && result.ok!==true && result.status!=='success')throw new Error(result.message||'Google Sheet சேமிப்பு உறுதிப்படுத்தப்படவில்லை. Apps Script-ல் saveUserPassword action தேவை.');
+    const all=readCredentials(),key=String(leader.id||leader.name||'leader');if(!all[key])all[key]={};
+    all[key][String(userSel.value)]={userId:uid,password:pw,updatedAt:new Date().toISOString()};saveCredentials(all);leaderData[String(userSel.value)]=all[key][String(userSel.value)];
+    note.textContent='✅ Google Sheet-ல் Password வெற்றிகரமாகச் சேமிக்கப்பட்டது.';note.style.color='#72ff9b';btn.textContent='✅ Saved';
+  }catch(err){
+    note.textContent='❌ Google Sheet-ல் சேமிக்கப்படவில்லை: '+(err.message||'Connection error');note.style.color='#ff7777';btn.textContent='💾 Retry Save';
+  }finally{btn.disabled=false;}
  };
- loadSelected();
  modal.querySelector('#credentialClose').onclick=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
 }
 function shareWhatsApp(){if(!leader)return;let msg=`Leader: ${leader.name}\nUsers: ${leaderUsers.length}\n\n`+leaderUsers.map((u,i)=>`${i+1}. ${u.name} — Balance ₹ ${balance(u).toLocaleString()}\n`+(u.transactions||[]).map(t=>`${fmtDate(t.date)} | ${t.desc||''} | Cr ₹${Number(t.credit||0).toLocaleString()} | Db ₹${Number(t.debit||0).toLocaleString()}`).join('\n')).join('\n\n');if(navigator.share)navigator.share({title:leader.name+' Transactions',text:msg}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')}
